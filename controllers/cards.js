@@ -15,5 +15,25 @@ module.exports.createCard = (req, res) => {
 }
 
 module.exports.deleteCard = (req, res) => {
-  console.log(req.body)
+  Card.findByIdAndDelete(req.params.cardId)
+    .then( card => res.send({cardDelete: card}))
+    .catch( err => res.status(500).send({message: err.message}))
+}
+
+module.exports.likeCard = (req, res) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    {$addToSet: {likes: req.user._id}}, // добавить _id в массив, если его там нет
+    {new: true},
+  ).then( likeCard => res.send({ like: likeCard}))
+    .catch( err => res.status(500).send({message: err.message}))
+}
+
+module.exports.dislikeCard = (req, res) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    {$pull: {likes: req.user._id}}, // убрать _id из массива
+    {new: true},
+  ).then( dislikeCard => res.send({ dislike: dislikeCard}))
+    .catch( err => res.status(500).send({message: err.message}))
 }

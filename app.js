@@ -24,13 +24,6 @@ app.use((req, res, next) => {
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
-
-// app.post('/users', (req, res) => {
-//   console.log(req.method)
-//   console.log(req.headers)
-//   console.log(req.body)
-//   res.send(req.body)
-// })
 app.listen(PORT, () => {
   console.log(`Server started on ${PORT}`)
 })
