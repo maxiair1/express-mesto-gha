@@ -14,6 +14,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   .catch((err) => console.log(`cant connect to db: ${err.message}`));
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 app.use((req, res, next) => {
   req.user = {
     "_id": "62baa22a52f1064814275157",
