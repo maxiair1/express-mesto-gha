@@ -1,20 +1,23 @@
 const User = require('../models/user');
 const ERROR_REQUEST = 400;
-const ERROR_NOTFOUND = 401;
+const ERROR_NOTFOUND = 404;
 const ERROR_SERVER = 500;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then( users => res.send({allUsers: users}))
-    .catch( err => res.status(ERROR_SERVER).send({message: "Ошибка по умолчанию."}))
+    .catch( () => res.status(ERROR_SERVER).send({message: "Ошибка по умолчанию."}))
 };
 
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .then( user => res.send({ user: user}))
+    .then( user => {
+      if(user === null) res.status(ERROR_NOTFOUND).send({message: "Пользователь по указанному _id не найден."})
+      else res.send({user: user})
+    })
     .catch( err => {
       if(err.name === "CastError"){
-        res.status(ERROR_NOTFOUND).send({message: "Пользователь по указанному _id не найден."});
+        res.status(ERROR_REQUEST).send({message: "Переданы некорректные данные при создании пользователя."});
       }
       else {
         res.status(ERROR_SERVER).send({message: "Ошибка по умолчанию."})
@@ -40,13 +43,16 @@ module.exports.createUser = ( req, res ) => {
 module.exports.updateUser = (req, res) => {
   const {name, about} = req.body;
   User.findByIdAndUpdate(req.user._id, {name, about},{new: true, runValidators: true})
-    .then( user => res.send({userUpdate: user}))
+    .then( user => {
+      if(user === null) res.status(ERROR_NOTFOUND).send({message: "Пользователь по указанному _id не найден."})
+      else res.send({userUpdate: user})
+    })
     .catch( err => {
       if(err.name === "ValidationError"){
         res.status(ERROR_REQUEST).send({message: "Переданы некорректные данные при обновлении профиля."});
       }
       else if(err.name === "CastError"){
-        res.status(ERROR_NOTFOUND).send({message: "Пользователь с указанным _id не найден."});
+        res.status(ERROR_REQUEST).send({message: "Переданы некорректные данные при обновлении профиля."});
       }
       else {
         res.status(ERROR_SERVER).send({message: "Ошибка по умолчанию."})
@@ -57,13 +63,13 @@ module.exports.updateUser = (req, res) => {
 module.exports.updateUserAvatar = (req, res) => {
   const {avatar} = req.body;
   User.findByIdAndUpdate(req.user._id, {avatar}, {new: true, runValidators: true})
-    .then( user => res.send({userUpdateAvatar: user}))
+    .then( user => {
+      if(user === null) res.status(ERROR_NOTFOUND).send({message: "Пользователь по указанному _id не найден."})
+      else res.send({userUpdateAvatar: user})
+    })
     .catch( err => {
-      if(err.name === "ValidationError"){
-        res.status(ERROR_REQUEST).send({message: "Переданы некорректные данные при обновлении аватара"});
-      }
-      else if(err.name === "CastError"){
-        res.status(ERROR_NOTFOUND).send({message: "Пользователь с указанным _id не найден."});
+      if(err.name === "ValidationError" || err.name === "CastError"){
+        res.status(ERROR_REQUEST).send({message: "Переданы некорректные данные при обновлении профиля."});
       }
       else {
         res.status(ERROR_SERVER).send({message: "Ошибка по умолчанию."})

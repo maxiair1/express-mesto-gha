@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 const ERROR_REQUEST = 400;
-const ERROR_NOTFOUND = 401;
+const ERROR_NOTFOUND = 404;
 const ERROR_SERVER = 500;
 
 module.exports.getCards = (req, res) => {
