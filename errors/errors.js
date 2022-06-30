@@ -6,7 +6,7 @@ class FindByIdError extends Error {
   constructor(message) {
     super(message);
     this.name = 'FindByIdError';
-    this.statusCode = 400;
+    this.statusCode = ERROR_NOTFOUND;
   }
 }
 
