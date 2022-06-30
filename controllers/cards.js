@@ -21,7 +21,7 @@ module.exports.createCard = (req, res) => {
         res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.' });
       } else if (err.name === 'CastError') {
         res.status(ERROR_NOTFOUND).send({ message: 'Пользователь с указанным _id не найден.' });
-      } else if (err.name === 'FindByIdError') res.send({ message: err.message });
+      } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
@@ -35,7 +35,7 @@ module.exports.deleteCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else if (err.name === 'FindByIdError') res.send({ message: err.message });
+      } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
@@ -53,7 +53,7 @@ module.exports.likeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else if (err.name === 'FindByIdError') res.send({ message: err.message });
+      } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
@@ -73,7 +73,7 @@ module.exports.dislikeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else if (err.name === 'FindByIdError') res.send({ message: err.message });
+      } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };

@@ -19,7 +19,7 @@ module.exports.getUserById = (req, res) => {
     .then((user) => res.send({ user }))
     .catch((err) => {
       if (err.name === 'CastError') res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
-      else if (err.name === 'FindByIdError') res.send({ message: err.message });
+      else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
@@ -43,7 +43,7 @@ module.exports.updateUser = (req, res) => {
     .then((user) => res.send({ userUpdate: user }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
-      else if (err.name === 'FindByIdError') res.send({ message: err.message });
+      else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
@@ -57,7 +57,7 @@ module.exports.updateUserAvatar = (req, res) => {
     .then((user) => res.send({ userUpdateAvatar: user }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
-      else if (err.name === 'FindByIdError') res.send({ message: err.message });
+      else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
