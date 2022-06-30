@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/maxiair1/express-mesto-gha.git"
   },
-  "author": "",
+  "author": "Maxim Kozhekin",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/maxiair1/express-mesto-gha/issues"
