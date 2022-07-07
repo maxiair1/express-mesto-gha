@@ -1,24 +1,32 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const ExistItemError = require('../errors/ExistItemError');
 const RequestDataError = require('../errors/RequestDataError');
+const { generateToken } = require('../helpers/jwt');
 
 module.exports.login = (req ,res, next) => {
   const { email, password } = req.body;
+  if(!email || !password) {
+    throw new RequestDataError('передан неверный логин или пароль.')
+  }
   User.findOne({ email })
     .then((user) => {
       if (!user) {
         return Promise.reject( new ExistItemError('передан неверный логин или пароль.'))
       }
-      return bcrypt.compare(password, user.password)
+      return Promise.all([
+        user,
+        bcrypt.compare(password, user.password)
+      ])
     })
-    .then((matched) => {
+    .then(([user, matched]) => {
       if (!matched) {
         return Promise.reject( new RequestDataError('передан неверный логин или пароль.'))
       }
-      const token = jwt.sign({_id: user._id }, 'some-secret-key', { expiresIn: '7d' })
-      res.send('all right!')
+      return generateToken({_id: user._id });
+    })
+    .then((token) => {
+      res.send({ token })
     })
     .catch(err => next(err))
 

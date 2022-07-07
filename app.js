@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login } = require('./controllers/login');
+const { createUser } = require('./controllers/users');
+const { auth } = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -19,10 +21,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/login', login);
+app.post('/signin', login);
+app.post('/signup', createUser);
 
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
+app.use('/users', auth, userRouter);
+app.use('/cards', auth, cardRouter);
 app.use((err, req, res, next) => {
   if (err.statusCode) {
     return res.status(err.statusCode).send({message: err.message, err});
@@ -44,5 +47,6 @@ const test = {
   "avatar": "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png",
   "email": "test2@ya.ru",
   "password": "$2a$10$W.THFruPVT1SCYxh/j4SYe2CszUuUVx5zZlv2Fo58fGaf4zVyHHLu",
-  "__v": 0
+  "__v": 0,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MmM2ZDQ3MmFlMTdjOTRhOTIyNjg2NjEiLCJpYXQiOjE2NTcyMDgzNjcsImV4cCI6MTY1NzgxMzE2N30.CCz_zpoGntWHCNctAeDLYnSjkCg8wR325JnAnwH9Klw"
 }
