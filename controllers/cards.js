@@ -1,10 +1,14 @@
 const Card = require('../models/card');
 const {
-  ERROR_REQUEST,
-  ERROR_NOTFOUND,
+  ERROR_CREATE,
+  ERROR_NOT_CORRECT,
+  ERROR_DELETE,
+  ERROR_NOT_FOUND,
+  ERROR_EXIST,
   ERROR_SERVER,
-  FindByIdError,
-} = require('../errors/errors');
+} = require('../errors/errorCode');
+const ExistItemError = require('../errors/ExistItemError')
+const ServerError = require('../errors/ServerError');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -18,10 +22,10 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные при создании карточки.' });
       } else if (err.name === 'CastError') {
-        res.status(ERROR_NOTFOUND).send({ message: 'Пользователь с указанным _id не найден.' });
-      } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
+        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден.' });
+      } else if (err.name === 'ExistItemError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
@@ -29,12 +33,12 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .orFail(() => {
-      throw new FindByIdError('Передан несуществующий _id карточки.');
+      throw new ExistItemError('Передан несуществующий _id карточки.');
     })
     .then((card) => res.send({ cardDelete: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -47,13 +51,13 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      throw new FindByIdError('Передан несуществующий _id карточки.');
+      throw new ExistItemError('Передан несуществующий _id карточки.');
     })
     .then((likeCard) => res.send({ like: likeCard }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
+        res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+      } else if (err.name === 'ExistItemError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
@@ -65,14 +69,14 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      throw new FindByIdError('Передан несуществующий _id карточки.');
+      throw new ExistItemError('Передан несуществующий _id карточки.');
     })
     .then((dislikeCard) => {
       res.send({ dislike: dislikeCard });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
