@@ -9,7 +9,9 @@ const auth = (req, res, next) => {
   const token = authToken.replace('Bearer ', '');
   try {
     req.user = checkToken(token);
+    // console.log('req.user: ', req.user)
   } catch (err) {
+    console.log('authError: ')
     throw new RequestDataError('передан неверный логин или пароль');
 
   }

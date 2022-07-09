@@ -16,10 +16,10 @@ mongoose.connect('mongodb://localhost:27017/mestodb', { useNewUrlParser: true })
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  req.user = { _id: '62baa22a52f1064814275157' };
-  next();
-});
+// app.use((req, res, next) => {
+//   req.user = { _id: '62baa22a52f1064814275157' };
+//   next();
+// });
 
 app.post('/signin', login);
 app.post('/signup', createUser);

@@ -28,14 +28,37 @@ module.exports.getUserById = (req, res) => {
     })
     .then((user) => res.send({ user }))
     .catch((err) => {
-      if (err.name === 'CastError') res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+      if (err.name === 'CastError') res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные при создании пользователя 1.' });
       else if (err.name === 'ExistItemError') res.status(err.statusCode).send({ message: err.message });
+      else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
+    });
+};
+
+module.exports.getUserInfo = (req, res) => {
+  User.findById(req.user._id)
+    .orFail(() => {
+      throw new ExistItemError('Передан несуществующий _id карточки.');
+    })
+    .then((user) => res.send({ user }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        console.log('CastError')
+        res.status(ERROR_CREATE).send({message: 'Переданы некорректные данные пользователя 2.'});
+      }
+      else if (err.name === 'ExistItemError') {
+        console.log('ExistItemError')
+
+        res.status(err.statusCode).send({message: err.message});
+      }
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar, email, password } = req.body;
+  if (!email || !password) {
+    throw new CreateItemError('Переданы некорректные данные при создании пользователя.');
+  }
   bcrypt
     .hash(password, saltRounds)
     .then((hash) => {
@@ -45,7 +68,7 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         //return Promise.reject(new CreateItemError('Переданы некорректные данные при создании пользователя.'))
-        res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные при создании пользователя 3.' });
       }
       else if (err.code === ERROR_MONGO_DUPLICATE_CODE) res.status(ERROR_EXIST).send({ message: 'при регистрации указан email, который уже существует на сервере' })
       else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.', err: err });

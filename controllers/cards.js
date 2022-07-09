@@ -7,7 +7,9 @@ const {
   ERROR_EXIST,
   ERROR_SERVER,
 } = require('../errors/errorCode');
-const ExistItemError = require('../errors/ExistItemError')
+const ExistItemError = require('../errors/ExistItemError');
+const DeleteItemError = require('../errors/DeleteItemError');
+const CreateItemError = require('../errors/CreateItemError');
 const ServerError = require('../errors/ServerError');
 
 module.exports.getCards = (req, res) => {
@@ -30,18 +32,42 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
+module.exports.deleteCard = (req, res, next) => {
+  Card.findOne({_id: req.params.cardId})
     .orFail(() => {
       throw new ExistItemError('Передан несуществующий _id карточки.');
     })
-    .then((card) => res.send({ cardDelete: card }))
+    .then((card) => {
+      if (card.owner.toString() !== req.user._id) {
+        console.log(card.owner.toString(), req.user._id);
+        throw new DeleteItemError('попытка удалить чужую карточку');
+      }
+      return Card.deleteOne({ _id: card._id.toString() });
+    })
+    .then((deletedCard) => {
+      res.send({ cardDelete: deletedCard })
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
-      else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
+        // res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        err = new CreateItemError('Переданы некорректные данные для даления карточки.')
+      }
+      // else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
+      // else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию 1.', err: err.message});
+        next(err)
     });
+
+  // Card.findByIdAndDelete(req.params.cardId)
+  //   .orFail(() => {
+  //     throw new ExistItemError('Передан несуществующий _id карточки.');
+  //   })
+  //   .then((card) => res.send({ cardDelete: card }))
+  //   .catch((err) => {
+  //     if (err.name === 'CastError') {
+  //       res.status(ERROR_CREATE).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+  //     } else if (err.name === 'FindByIdError') res.status(err.statusCode).send({ message: err.message });
+  //     else res.status(ERROR_SERVER).send({ message: 'Ошибка по умолчанию.' });
+  //   });
 };
 
 module.exports.likeCard = (req, res) => {
