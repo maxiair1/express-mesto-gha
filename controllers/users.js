@@ -51,11 +51,7 @@ module.exports.getUserInfo = (req, res, next) => {
 
 module.exports.createUser = (req, res, next) => {
   const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
+    name, about, avatar, email, password,
   } = req.body;
   if (!email || !password) {
     throw new CreateItemError('Переданы некорректные данные при создании пользователя.');
@@ -63,11 +59,7 @@ module.exports.createUser = (req, res, next) => {
   bcrypt
     .hash(password, saltRounds)
     .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
+      name, about, avatar, email, password: hash,
     }))
     .then((user) => res.send({ newUser: user }))
     .catch((err) => {
