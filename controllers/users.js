@@ -3,6 +3,7 @@ const User = require('../models/user');
 const { ERROR_MONGO_DUPLICATE_CODE } = require('../errors/errorCode');
 const CreateItemError = require('../errors/CreateItemError');
 const ExistItemError = require('../errors/ExistItemError');
+const NotFoundError = require('../errors/NotFoundError');
 const ServerError = require('../errors/ServerError');
 
 const saltRounds = 10;
@@ -18,13 +19,13 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      throw new ExistItemError('Передан несуществующий _id карточки.');
+      throw new NotFoundError('Передан несуществующий _id карточки.');
     })
     .then((user) => res.send({ user }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new CreateItemError('Переданы некорректные данные'));
-      } else if (err.name === 'ExistItemError') {
+      } else if (err.name === 'NotFoundError') {
         next(err);
       } else {
         next(new ServerError('Ошибка по умолчанию.'));
@@ -61,7 +62,16 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({ newUser: user }))
+    .then((user) => {
+      const newUser = {
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+        _id: user._id,
+      };
+      res.send(newUser);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new CreateItemError('Переданы некорректные данные при создании пользователя.'));

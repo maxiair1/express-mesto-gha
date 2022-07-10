@@ -1,5 +1,4 @@
 const Card = require('../models/card');
-const ExistItemError = require('../errors/ExistItemError');
 const DeleteItemError = require('../errors/DeleteItemError');
 const CreateItemError = require('../errors/CreateItemError');
 const NotFoundError = require('../errors/NotFoundError');
@@ -31,7 +30,7 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   Card.findOne({ _id: req.params.cardId })
     .orFail(() => {
-      throw new ExistItemError('Передан несуществующий _id карточки.');
+      throw new NotFoundError('Передан несуществующий _id карточки.');
     })
     .then((card) => {
       if (card.owner.toString() !== req.user._id) {
@@ -45,7 +44,7 @@ module.exports.deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new CreateItemError('Переданы некорректные данные для удаления карточки.'));
-      } else if (err.name === 'ExistItemError') {
+      } else if (err.name === 'NotFoundError') {
         next(err);
       } else if (err.name === 'DeleteItemError') {
         next(err);
@@ -62,13 +61,13 @@ module.exports.likeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      throw new ExistItemError('Передан несуществующий _id карточки.');
+      throw new NotFoundError('Передан несуществующий _id карточки.');
     })
     .then((likeCard) => res.send({ like: likeCard }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new CreateItemError('Переданы некорректные данные для постановки/снятии лайка.'));
-      } else if (err.name === 'ExistItemError') {
+      } else if (err.name === 'NotFoundError') {
         next(err);
       } else {
         next(new ServerError('Ошибка по умолчанию.'));
@@ -83,7 +82,7 @@ module.exports.dislikeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      throw new ExistItemError('Передан несуществующий _id карточки.');
+      throw new NotFoundError('Передан несуществующий _id карточки.');
     })
     .then((dislikeCard) => {
       res.send({ dislike: dislikeCard });
@@ -91,7 +90,7 @@ module.exports.dislikeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new CreateItemError('Переданы некорректные данные для постановки/снятии лайка.'));
-      } else if (err.name === 'ExistItemError') {
+      } else if (err.name === 'NotFoundError') {
         next(err);
       } else {
         next(new ServerError('Ошибка по умолчанию.'));
