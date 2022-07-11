@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { ERROR_MONGO_DUPLICATE_CODE } = require('../errors/errorCode');
-const CreateItemError = require('../errors/CreateItemError');
+const RequestNotCorrectError = require('../errors/RequestNotCorrectError');
 const ExistItemError = require('../errors/ExistItemError');
 const NotFoundError = require('../errors/NotFoundError');
 const ServerError = require('../errors/ServerError');
@@ -24,7 +24,7 @@ module.exports.getUserById = (req, res, next) => {
     .then((user) => res.send({ user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CreateItemError('Переданы некорректные данные'));
+        next(new RequestNotCorrectError('Переданы некорректные данные'));
       } else if (err.name === 'NotFoundError') {
         next(err);
       } else {
@@ -41,7 +41,7 @@ module.exports.getUserInfo = (req, res, next) => {
     .then((user) => res.send({ user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CreateItemError('Переданы некорректные данные'));
+        next(new RequestNotCorrectError('Переданы некорректные данные'));
       } else if (err.name === 'ExistItemError') {
         next(err);
       } else {
@@ -55,7 +55,7 @@ module.exports.createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
   if (!email || !password) {
-    throw new CreateItemError('Переданы некорректные данные при создании пользователя.');
+    throw new RequestNotCorrectError('Переданы некорректные данные при создании пользователя.');
   }
   bcrypt
     .hash(password, saltRounds)
@@ -74,10 +74,10 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new CreateItemError('Переданы некорректные данные при создании пользователя.'));
+        next(new RequestNotCorrectError('Переданы некорректные данные при создании пользователя.'));
       } else if (err.code === ERROR_MONGO_DUPLICATE_CODE) {
         next(new ExistItemError('При регистрации указан email, который уже существует на сервере'));
-      } else if (err.name === 'CreateItemError') {
+      } else if (err.name === 'RequestNotCorrectError') {
         next(err);
       } else {
         next(new ServerError('Ошибка по умолчанию.'));
@@ -94,7 +94,7 @@ module.exports.updateUser = (req, res, next) => {
     .then((user) => res.send({ userUpdate: user }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new CreateItemError('Переданы некорректные данные при обновлении профиля.'));
+        next(new RequestNotCorrectError('Переданы некорректные данные при обновлении профиля.'));
       } else if (err.name === 'ExistItemError') {
         next(err);
       } else {
@@ -112,7 +112,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
     .then((user) => res.send({ userUpdateAvatar: user }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new CreateItemError('Переданы некорректные данные при обновлении профиля.'));
+        next(new RequestNotCorrectError('Переданы некорректные данные при обновлении профиля.'));
       } else if (err.name === 'ExistItemError') {
         next(err);
       } else {

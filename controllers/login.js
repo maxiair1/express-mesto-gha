@@ -1,14 +1,11 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-// const ExistItemError = require('../errors/ExistItemError');
 const RequestDataError = require('../errors/RequestDataError');
 const { generateToken } = require('../helpers/jwt');
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    throw new RequestDataError('передан неверный логин или пароль.');
-  }
+
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
